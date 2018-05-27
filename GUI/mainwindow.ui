@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>660</width>
+    <height>628</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Ball And Plate Control Panel</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QFrame" name="Plate_Controller_Fr">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>311</width>
+      <height>211</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLabel" name="Plate_Controller_La">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>0</y>
+       <width>101</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Plate Controller</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Plate_Controller_Apply_Bu">
+     <property name="geometry">
+      <rect>
+       <x>22</x>
+       <y>170</y>
+       <width>271</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="Plate_Controller_PID_GB">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>121</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>PID Controller</string>
+     </property>
+     <widget class="QDoubleSpinBox" name="PID_Kd_Box">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>90</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="minimum">
+       <double>-999.990000000000009</double>
+      </property>
+      <property name="maximum">
+       <double>999.990000000000009</double>
+      </property>
+      <property name="singleStep">
+       <double>0.100000000000000</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="PID_Kp_La">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Kp</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="PID_Kd_La">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>90</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Kd</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="PID_Ki_Box">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>60</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="minimum">
+       <double>-999.990000000000009</double>
+      </property>
+      <property name="maximum">
+       <double>999.990000000000009</double>
+      </property>
+      <property name="singleStep">
+       <double>0.100000000000000</double>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="PID_Kp_Box">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>30</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="minimum">
+       <double>-999.990000000000009</double>
+      </property>
+      <property name="maximum">
+       <double>999.990000000000009</double>
+      </property>
+      <property name="singleStep">
+       <double>0.100000000000000</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="PID_Ki_La">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Ki</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="Plate_Controller_SMC_GB">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>40</y>
+       <width>121</width>
+       <height>101</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Sliding Mode Control</string>
+     </property>
+     <widget class="QDoubleSpinBox" name="SMC_k1_Box">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>60</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="minimum">
+       <double>-999.990000000000009</double>
+      </property>
+      <property name="maximum">
+       <double>999.990000000000009</double>
+      </property>
+      <property name="singleStep">
+       <double>0.100000000000000</double>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="SMC_K_Box">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>30</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>4</number>
+      </property>
+      <property name="minimum">
+       <double>-999.990000000000009</double>
+      </property>
+      <property name="maximum">
+       <double>999.990000000000009</double>
+      </property>
+      <property name="singleStep">
+       <double>0.100000000000000</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="SMC_k1_La">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>k1</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="SMC_K_La">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>K</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QRadioButton" name="Plate_Controller_PID_Ch">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PID</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="Plate_Controller_SMC_Ch">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>20</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>SMC</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QFrame" name="Mode_Fr">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>240</y>
+      <width>311</width>
+      <height>381</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLabel" name="Mode_La">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>0</y>
+       <width>101</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Mode</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="Mode_Circle_GB">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>291</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Circle Mode</string>
+     </property>
+     <widget class="QLabel" name="Circle_R_La">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>R</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="Circle_CentralY_La">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>30</y>
+        <width>61</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Central Y</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="Circle_CentralX_La">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>30</y>
+        <width>61</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Central X</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="Circle_R_Box">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>120</number>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="Circle_CentralX_Box">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>50</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>320</number>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="Circle_CentralY_Box">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>50</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>320</number>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="Mode_Rectangle_RB">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>130</y>
+       <width>291</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Rectangle Mode</string>
+     </property>
+     <widget class="QLabel" name="Rectangle_TopLeftX_La">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>30</y>
+        <width>81</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Top Left X</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="Rectangle_BotRightX_La">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>30</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Bottom Right X</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="Rectangle_TopLeftY_La">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>80</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Top Left Y</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="Rectangle_BotRightY_La">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>80</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Bottom Right Y</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="Rectangle_TopLeftX_Box">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>50</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>320</number>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="Rectangle_TopLeftY_Box">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>100</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>320</number>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="Rectangle_BotRightX_Box">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>50</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>320</number>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="Rectangle_BotRightY_Box">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>100</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>320</number>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="Mode_FreeSet_GB">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>270</y>
+       <width>291</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Free Set Mode</string>
+     </property>
+     <widget class="QLabel" name="FreeSet_X_La">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>X</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="FreeSet_Y_La">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>30</y>
+        <width>16</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="text">
+       <string>Y</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="FreeSet_X_Box">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>30</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>320</number>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="FreeSet_Y_Box">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>30</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>320</number>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="Mode_Apply_Bu">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>340</y>
+       <width>291</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="Mode_Circle_Ch">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>61</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Circle</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="Mode_Rectangle_Ch">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>20</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Rectangle</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="Mode_FreeSet_Ch">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>20</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Free Set</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGraphicsView" name="PlateView_Gra">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>20</y>
+      <width>320</width>
+      <height>320</height>
+     </rect>
+    </property>
+    <property name="interactive">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="XAxist_Angle_Gra">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>360</y>
+      <width>320</width>
+      <height>120</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="YAxist_Angle_Gra">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>500</y>
+      <width>320</width>
+      <height>120</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="PlateView_La">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>0</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Plate View</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="XAxist_Angle_La">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>340</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>X Axist Angle</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="YAxist_Angle_La">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>480</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Y Axist Angle</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
