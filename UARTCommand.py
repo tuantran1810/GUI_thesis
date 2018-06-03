@@ -17,96 +17,22 @@ ser = serial.Serial(
     parity = serial.PARITY_NONE,
     stopbits = serial.STOPBITS_ONE,
     bytesize = serial.EIGHTBITS,
-    timeout = None
+    timeout = 0.01
 )
-
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Buffer for receiving UART command
-class CommandBuffer:
-    def __init__(self, BSize, CmdQueue, CmdQueueLock, CmdQueueSem):
-        self.Queue = CmdQueue
-        self.QueueLock = CmdQueueLock
-        self.QueueSem = CmdQueueSem
-        self.BufferArr = ''
-        self.isEmpty = 1
-        self.isFull = 0
-        self.WrtPtr = 0
-        self.Size = BSize
-        self.CmdStart = 0
-        self.CmdStartPtr = 0
-        self.CmdEnd = 0
-        self.CmdEndPtr = 0
-
-    def isFull(self):
-        return self.isFull
-
-    def isEmpty(self):
-        return self.isEmpty
-
-    def WriteBuffer(self, char):
-        if self.isFull == 0:
-            self.BufferArr += char
-            self.isEmpty = 0
-
-            if self.WrtPtr == self.Size:
-                self.isFull = 1
-
-            if (char == START_OF_TEXT_D):
-                if (self.CmdStart == 0):
-                    self.CmdStartPtr = self.WrtPtr
-                    self.CmdStart = 1
-                else:
-                    self.ResetBuffer()
-
-            if (char == END_OF_TEXT_D):
-                if (self.CmdEnd == 0 and self.CmdStart == 1):
-                    self.CmdEndPtr = self.WrtPtr
-                    self.CmdEnd = 1
-                else:
-                    self.ResetBuffer()
-
-            if (self.CmdStart == 1 and self.CmdEnd == 1):
-                self.ProcessCommand()
-            else:
-                self.WrtPtr += 1
-
-    def ResetBuffer(self):
-        self.BufferArr = ''
-        self.isEmpty = 1
-        self.isFull = 0
-        self.WrtPtr = 0
-        self.CmdStart = 0
-        self.CmdStartPtr = 0
-        self.CmdEnd = 0
-        self.CmdEndPtr = 0
-        self.CmdReady = 0
-
-    def ReadBuffer(self):
-        return self.BufferArr
-
-    def ProcessCommand(self):
-        if (self.CmdStart == 1) and (self.CmdEnd == 1):
-            if (self.CmdStartPtr < self.CmdEndPtr):
-                self.QueueLock.acquire()
-                self.Queue.put(self.BufferArr[self.CmdStartPtr+1:self.CmdEndPtr])
-                self.QueueLock.release()
-                self.QueueSem.release()
-        self.ResetBuffer()
-
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # UART receiving thread
 class RecvThread (threading.Thread):
 
-    def __init__(self, CmdBuffer):
+    def __init__(self, RecvMsgQueue):
         threading.Thread.__init__(self)
-        self.CmdBuffer = CmdBuffer
+        self.RecvMsgQueue = RecvMsgQueue
         self.RecvRunning = 1
 
     def run(self):
         while (self.RecvRunning == 1):
-            inData = ser.read()
-            self.CmdBuffer.WriteBuffer(inData)
-            usleep(5)
+            inData = ser.read(70)
+            if(inData != ''):
+                self.RecvMsgQueue.put(inData)
 
     def destroy(self):
         self.RecvRunning = 0

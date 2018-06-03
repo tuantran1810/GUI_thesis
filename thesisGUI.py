@@ -8,25 +8,31 @@ import serial
 
 import UARTCommand
 from PyQt5 import QtCore, QtGui, QtWidgets
+import pyqtgraph as pg
 
-BAP_QUEUE_SIZE = 10
-BAP_QUEUE_MESS_SIZE = 50
+BAP_QUEUE_SIZE = 1
 
 BAP_RecvMsgQueue = Queue.Queue(BAP_QUEUE_SIZE)
-BAP_RecvMsgQueueMutex = threading.Lock()
-BAP_RecvMsgQueueSem = threading.Semaphore(1)
 
 BAP_SendMsgQueue = Queue.Queue(BAP_QUEUE_SIZE)
 BAP_SendMsgQueueMutex = threading.Lock()
 BAP_SendMsgQueueSem = threading.Semaphore(1)
 
-BAP_CmdBuffer = UARTCommand.CommandBuffer(BAP_QUEUE_MESS_SIZE, BAP_RecvMsgQueue, BAP_RecvMsgQueueMutex, BAP_RecvMsgQueueSem)
+BAP_SharedVarsMutex = threading.Lock()
+
+BAP_SharedVarsList = [None]*10
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Ui_MainWindow(object):
+    def __init__(self, window, recvmsg):
+        self.window = window
+        self.recvmsg = recvmsg
+        self.setupUi(window)
+        self.Running = 1
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(660, 628)
+        MainWindow.resize(750, 720)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
         self.Plate_Controller_Fr = QtWidgets.QFrame(self.centralWidget)
@@ -222,10 +228,10 @@ class Ui_MainWindow(object):
         self.Rectangle_BotRightY_Box.setMaximum(320)
         self.Rectangle_BotRightY_Box.setObjectName("Rectangle_BotRightY_Box")
 #Init value
-        self.Rectangle_TopLeftX_Box.setValue(50)
-        self.Rectangle_TopLeftY_Box.setValue(50)
-        self.Rectangle_BotRightX_Box.setValue(270)
-        self.Rectangle_BotRightY_Box.setValue(270)
+        self.Rectangle_TopLeftX_Box.setValue(100)
+        self.Rectangle_TopLeftY_Box.setValue(100)
+        self.Rectangle_BotRightX_Box.setValue(220)
+        self.Rectangle_BotRightY_Box.setValue(220)
 ###################
 #Disable Rectangle box by default
         self.Rectangle_TopLeftX_Box.lineEdit().setEnabled(False)
@@ -283,27 +289,55 @@ class Ui_MainWindow(object):
         self.Mode_FreeSet_Ch.toggled.connect(self.BAP_Mode_FreeSet_Toggle)
         self.Mode_FreeSet_Ch.setChecked(True)
 ###################
-        self.PlateView_Gra = QtWidgets.QGraphicsView(self.centralWidget)
-        self.PlateView_Gra.setGeometry(QtCore.QRect(330, 20, 320, 320))
-        self.PlateView_Gra.setInteractive(True)
+        self.PlateView_Gra = pg.PlotWidget(self.centralWidget)
+        self.PlateView_Gra.setGeometry(QtCore.QRect(330, 20, 400, 400))
+        self.PlateView_Gra.setInteractive(False)
         self.PlateView_Gra.setObjectName("PlateView_Gra")
-        self.XAxist_Angle_Gra = QtWidgets.QGraphicsView(self.centralWidget)
-        self.XAxist_Angle_Gra.setGeometry(QtCore.QRect(330, 360, 320, 120))
+        self.PlateView_Gra.setXRange(0, 320, padding = 0)
+        self.PlateView_Gra.setYRange(0, 320, padding = 0)
+        self.PlateView_Gra.getViewBox().invertY(True)
+
+        self.XAxist_Angle_Gra = pg.PlotWidget(self.centralWidget)
+        self.XAxist_Angle_Gra.setGeometry(QtCore.QRect(330, 440, 400, 120))
+        self.XAxist_Angle_Gra.setInteractive(False)
         self.XAxist_Angle_Gra.setObjectName("XAxist_Angle_Gra")
-        self.YAxist_Angle_Gra = QtWidgets.QGraphicsView(self.centralWidget)
-        self.YAxist_Angle_Gra.setGeometry(QtCore.QRect(330, 500, 320, 120))
+        self.XAxist_Angle_Gra.setXRange(0, 20, padding = 0)
+        self.XAxist_Angle_Gra.setYRange(-12, 12, padding = 0)
+
+        self.YAxist_Angle_Gra = pg.PlotWidget(self.centralWidget)
+        self.YAxist_Angle_Gra.setGeometry(QtCore.QRect(330, 580, 400, 120))
+        self.YAxist_Angle_Gra.setInteractive(False)
         self.YAxist_Angle_Gra.setObjectName("YAxist_Angle_Gra")
+        self.YAxist_Angle_Gra.setXRange(0, 20, padding = 0)
+        self.YAxist_Angle_Gra.setYRange(-12, 12, padding = 0)
+
+        self.PlateView_Controller_La = QtWidgets.QLabel(self.centralWidget)
+        self.PlateView_Controller_La.setGeometry(QtCore.QRect(700, 20, 30, 16))
+        self.PlateView_Controller_La.setObjectName("PlateView_Controller_La")
+        self.PlateView_Controller_La.setStyleSheet('color: white')
+
+        self.PlateView_Mode_La = QtWidgets.QLabel(self.centralWidget)
+        self.PlateView_Mode_La.setGeometry(QtCore.QRect(700, 40, 30, 16))
+        self.PlateView_Mode_La.setObjectName("PlateView_Mode_La")
+        self.PlateView_Mode_La.setStyleSheet('color: white')
+
         self.PlateView_La = QtWidgets.QLabel(self.centralWidget)
         self.PlateView_La.setGeometry(QtCore.QRect(330, 0, 91, 16))
         self.PlateView_La.setObjectName("PlateView_La")
-        self.XAxist_Angle_La = QtWidgets.QLabel(self.centralWidget)
-        self.XAxist_Angle_La.setGeometry(QtCore.QRect(330, 340, 91, 16))
-        self.XAxist_Angle_La.setObjectName("XAxist_Angle_La")
-        self.YAxist_Angle_La = QtWidgets.QLabel(self.centralWidget)
-        self.YAxist_Angle_La.setGeometry(QtCore.QRect(330, 480, 91, 16))
-        self.YAxist_Angle_La.setObjectName("YAxist_Angle_La")
-        MainWindow.setCentralWidget(self.centralWidget)
 
+        self.XAxist_Angle_La = QtWidgets.QLabel(self.centralWidget)
+        self.XAxist_Angle_La.setGeometry(QtCore.QRect(330, 420, 91, 16))
+        self.XAxist_Angle_La.setObjectName("XAxist_Angle_La")
+
+        self.YAxist_Angle_La = QtWidgets.QLabel(self.centralWidget)
+        self.YAxist_Angle_La.setGeometry(QtCore.QRect(330, 560, 91, 16))
+        self.YAxist_Angle_La.setObjectName("YAxist_Angle_La")
+
+        self.Parsing = ParsingThread(self.recvmsg)
+        # self.Parsing.graph_update.connect(self.BAP_GraphUpdate)
+        self.Parsing.start()
+
+        MainWindow.setCentralWidget(self.centralWidget)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -311,6 +345,8 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Ball And Plate Control Panel"))
         self.Plate_Controller_La.setText(_translate("MainWindow", "Plate Controller"))
+        self.PlateView_Controller_La.setText(_translate("MainWindow", "PID"))
+        self.PlateView_Mode_La.setText(_translate("MainWindow", "FSe"))
         self.Plate_Controller_Apply_Bu.setText(_translate("MainWindow", "Apply"))
         self.Plate_Controller_PID_GB.setTitle(_translate("MainWindow", "PID Controller"))
         self.PID_Kp_La.setText(_translate("MainWindow", "Kp"))
@@ -369,6 +405,7 @@ class Ui_MainWindow(object):
             BAP_SendMsgQueueSem.release()
 
     def BAP_Mode_Apply(self):
+        print "BAP_Mode_Apply"
         if(self.Mode_Circle_Ch.isChecked()):
             R = self.Circle_R_Box.value()
             x = self.Circle_CentralX_Box.value()
@@ -456,18 +493,67 @@ class Ui_MainWindow(object):
             self.FreeSet_X_Box.lineEdit().setEnabled(False)
             self.FreeSet_Y_Box.lineEdit().setEnabled(False)
 
+    def BAP_GraphUpdate(self):
+        global BAP_SharedVarsList
+        time_count = 0
+        while (self.Running == 1):
+            time_count += 0.02
+            BAP_SharedVarsMutex.acquire()
+            Lst = BAP_SharedVarsList[:]
+            BAP_SharedVarsMutex.release()
+            self.PlateView_Controller_La.setText(Lst[8])
+            self.PlateView_Mode_La.setText(Lst[9])
+            self.XAxist_Angle_Gra.plot([time_count], [0])
+            # self.YAxist_Angle_Gra.plot([time_count], Lst[5])
+            if(time_count >= 20):
+                time_count = 0
+            sleep(0.01)
+
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-BAP_RecvThread = UARTCommand.RecvThread(BAP_CmdBuffer)
-BAP_SendThread = UARTCommand.SendThread(BAP_SendMsgQueue, BAP_SendMsgQueueMutex, BAP_SendMsgQueueSem)
-BAP_RecvThread.start()
-BAP_SendThread.start()
+# Parsing thread
+class ParsingThread(QtCore.QThread):
+    graph_update = QtCore.pyqtSignal(int)
+
+    def __init__(self, RecvMsgQueue):
+        QtCore.QThread.__init__(self)
+        self.RecvMsgQueue = RecvMsgQueue
+        self.Running = 1
+
+    def run(self):
+        global BAP_SharedVarsList
+        while (self.Running == 1):
+            if not self.RecvMsgQueue.empty():
+                data = self.RecvMsgQueue.get()
+                parse = data.split()
+                if (len(parse) == 12 and parse[0] == "[Strm]["):
+                    BAP_SharedVarsMutex.acquire()
+                    BAP_SharedVarsList[0] = int(parse[1])
+                    BAP_SharedVarsList[1] = int(parse[2])
+                    BAP_SharedVarsList[2] = int(parse[3])
+                    BAP_SharedVarsList[3] = int(parse[4])
+                    BAP_SharedVarsList[4] = float(parse[5])
+                    BAP_SharedVarsList[5] = float(parse[6])
+                    BAP_SharedVarsList[6] = float(parse[7])
+                    BAP_SharedVarsList[7] = float(parse[8])
+                    BAP_SharedVarsList[8] = parse[9]
+                    BAP_SharedVarsList[9] = parse[10]
+                    BAP_SharedVarsMutex.release()
+                    self.graph_update.emit(1)
+
+    def destroy(self):
+        self.Running = 0
 
 if __name__ == "__main__":
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
+    BAP_UI = Ui_MainWindow(MainWindow, BAP_RecvMsgQueue)
+
+    BAP_RecvThread = UARTCommand.RecvThread(BAP_RecvMsgQueue)
+    BAP_SendThread = UARTCommand.SendThread(BAP_SendMsgQueue, BAP_SendMsgQueueMutex, BAP_SendMsgQueueSem)
+
+    BAP_RecvThread.start()
+    BAP_SendThread.start()
+
     MainWindow.show()
     sys.exit(app.exec_())
 
