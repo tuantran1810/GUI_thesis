@@ -10,7 +10,7 @@ import UARTCommand
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 
-BAP_QUEUE_SIZE = 1
+BAP_QUEUE_SIZE = 100
 
 BAP_RecvMsgQueue = Queue.Queue(BAP_QUEUE_SIZE)
 
@@ -19,8 +19,16 @@ BAP_SendMsgQueueMutex = threading.Lock()
 BAP_SendMsgQueueSem = threading.Semaphore(1)
 
 BAP_SharedVarsMutex = threading.Lock()
-
-BAP_SharedVarsList = [None]*10
+BAP_x_realpos = np.empty([1000])
+BAP_y_realpos = np.empty([1000])
+BAP_x_setpoint = np.empty([1000])
+BAP_y_setpoint = np.empty([1000])
+BAP_x_motor_realpos = np.empty([1000])
+BAP_y_motor_realpos = np.empty([1000])
+BAP_x_motor_setpoint = np.empty([1000])
+BAP_y_motor_setpoint = np.empty([1000])
+BAP_controller = None
+BAP_mode = None
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Ui_MainWindow(object):
@@ -29,6 +37,19 @@ class Ui_MainWindow(object):
         self.recvmsg = recvmsg
         self.setupUi(window)
         self.Running = 1
+
+        self.time_sec = 0
+        self.graph_x = np.linspace(0.0, 20.0, num = 1000)
+        self.x_realpos = np.empty([1000])
+        self.y_realpos = np.empty([1000])
+        self.x_setpoint = np.empty([1000])
+        self.y_setpoint = np.empty([1000])
+        self.x_motor_realpos = np.empty([1000])
+        self.y_motor_realpos = np.empty([1000])
+        self.x_motor_setpoint = np.empty([1000])
+        self.y_motor_setpoint = np.empty([1000])
+        self.controller = None
+        self.mode = None
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -334,7 +355,7 @@ class Ui_MainWindow(object):
         self.YAxist_Angle_La.setObjectName("YAxist_Angle_La")
 
         self.Parsing = ParsingThread(self.recvmsg)
-        # self.Parsing.graph_update.connect(self.BAP_GraphUpdate)
+        self.Parsing.graph_update.connect(self.BAP_GraphUpdate)
         self.Parsing.start()
 
         MainWindow.setCentralWidget(self.centralWidget)
@@ -494,51 +515,138 @@ class Ui_MainWindow(object):
             self.FreeSet_Y_Box.lineEdit().setEnabled(False)
 
     def BAP_GraphUpdate(self):
-        global BAP_SharedVarsList
-        time_count = 0
-        while (self.Running == 1):
-            time_count += 0.02
-            BAP_SharedVarsMutex.acquire()
-            Lst = BAP_SharedVarsList[:]
-            BAP_SharedVarsMutex.release()
-            self.PlateView_Controller_La.setText(Lst[8])
-            self.PlateView_Mode_La.setText(Lst[9])
-            self.XAxist_Angle_Gra.plot([time_count], [0])
-            # self.YAxist_Angle_Gra.plot([time_count], Lst[5])
-            if(time_count >= 20):
-                time_count = 0
-            sleep(0.01)
+        global BAP_SharedVarsMutex
+        global BAP_x_realpos
+        global BAP_y_realpos
+        global BAP_x_setpoint
+        global BAP_y_setpoint
+        global BAP_x_motor_realpos
+        global BAP_y_motor_realpos
+        global BAP_x_motor_setpoint
+        global BAP_y_motor_setpoint
+        global BAP_controller
+        global BAP_mode
+
+        BAP_SharedVarsMutex.acquire()
+        self.x_realpos = BAP_x_realpos.copy()
+        self.y_realpos = BAP_y_realpos.copy()
+        self.x_setpoint = BAP_x_setpoint.copy()
+        self.y_setpoint = BAP_y_setpoint.copy()
+        self.x_motor_realpos = BAP_x_motor_realpos.copy()
+        self.y_motor_realpos = BAP_y_motor_realpos.copy()
+        self.x_motor_setpoint = BAP_x_motor_setpoint.copy()
+        self.y_motor_setpoint = BAP_y_motor_setpoint.copy()
+        self.controller = BAP_controller
+        self.mode = BAP_mode
+        BAP_SharedVarsMutex.release()
+
+        self.PlateView_Controller_La.setText(BAP_controller)
+        self.PlateView_Mode_La.setText(BAP_mode)
+
+        self.XAxist_Angle_Gra.clear()
+        self.YAxist_Angle_Gra.clear()
+        self.PlateView_Gra.clear()
+
+        if(self.time_sec < 20):
+            self.time_sec += 1
+            self.XAxist_Angle_Gra.plot(self.graph_x[0:self.time_sec*50], self.x_motor_realpos[0:self.time_sec*50], pen = 'g')
+            self.YAxist_Angle_Gra.plot(self.graph_x[0:self.time_sec*50], self.y_motor_realpos[0:self.time_sec*50], pen = 'g')
+            self.PlateView_Gra.plot(self.x_setpoint[0:self.time_sec*50], self.y_setpoint[0:self.time_sec*50], pen = 'r')
+        else:
+            self.XAxist_Angle_Gra.plot(self.graph_x, self.x_motor_realpos, pen = 'g')
+            self.YAxist_Angle_Gra.plot(self.graph_x, self.y_motor_realpos, pen = 'g')
+            self.PlateView_Gra.plot(self.x_setpoint, self.y_setpoint, pen = 'r')
+        # self.graph_count += 1
+        # if(self.graph_count == 50):
+        #     self.graph_count = 0
+        #     self.XAxist_Angle_Gra.plot(self.graph_x, self.graph_y, pen = 'g')
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Parsing thread
 class ParsingThread(QtCore.QThread):
-    graph_update = QtCore.pyqtSignal(int)
+    graph_update = QtCore.pyqtSignal(object)
 
     def __init__(self, RecvMsgQueue):
         QtCore.QThread.__init__(self)
         self.RecvMsgQueue = RecvMsgQueue
         self.Running = 1
+        self.x_realpos = np.empty([1000])
+        self.y_realpos = np.empty([1000])
+        self.x_setpoint = np.empty([1000])
+        self.y_setpoint = np.empty([1000])
+        self.x_motor_realpos = np.empty([1000])
+        self.y_motor_realpos = np.empty([1000])
+        self.x_motor_setpoint = np.empty([1000])
+        self.y_motor_setpoint = np.empty([1000])
+        self.controller = None
+        self.mode = None
 
     def run(self):
-        global BAP_SharedVarsList
+        sample_count = 0
+        second_count = 0
+
         while (self.Running == 1):
             if not self.RecvMsgQueue.empty():
                 data = self.RecvMsgQueue.get()
                 parse = data.split()
+
                 if (len(parse) == 12 and parse[0] == "[Strm]["):
-                    BAP_SharedVarsMutex.acquire()
-                    BAP_SharedVarsList[0] = int(parse[1])
-                    BAP_SharedVarsList[1] = int(parse[2])
-                    BAP_SharedVarsList[2] = int(parse[3])
-                    BAP_SharedVarsList[3] = int(parse[4])
-                    BAP_SharedVarsList[4] = float(parse[5])
-                    BAP_SharedVarsList[5] = float(parse[6])
-                    BAP_SharedVarsList[6] = float(parse[7])
-                    BAP_SharedVarsList[7] = float(parse[8])
-                    BAP_SharedVarsList[8] = parse[9]
-                    BAP_SharedVarsList[9] = parse[10]
-                    BAP_SharedVarsMutex.release()
+                    self.x_realpos[second_count*50 + sample_count] = int(parse[1])
+                    self.y_realpos[second_count*50 + sample_count] = int(parse[2])
+                    self.x_setpoint[second_count*50 + sample_count] = int(parse[3])
+                    self.y_setpoint[second_count*50 + sample_count] = int(parse[4])
+                    self.x_motor_realpos[second_count*50 + sample_count] = float(parse[5])
+                    self.y_motor_realpos[second_count*50 + sample_count] = float(parse[6])
+                    self.x_motor_setpoint[second_count*50 + sample_count] = float(parse[7])
+                    self.y_motor_setpoint[second_count*50 + sample_count] = float(parse[8])
+                    self.controller = parse[9]
+                    self.mode = parse[10]
+                    sample_count += 1
+
+                if (sample_count == 50):
+                    second_count += 1
+                    sample_count = 0
+                    self.copy_to_sharedvars()
+                    if(second_count == 20):
+                        self.array_move_block()
+                        second_count = 19
                     self.graph_update.emit(1)
+
+    def copy_to_sharedvars(self):
+        global BAP_SharedVarsMutex
+        global BAP_x_realpos
+        global BAP_y_realpos
+        global BAP_x_setpoint
+        global BAP_y_setpoint
+        global BAP_x_motor_realpos
+        global BAP_y_motor_realpos
+        global BAP_x_motor_setpoint
+        global BAP_y_motor_setpoint
+        global BAP_controller
+        global BAP_mode
+
+        BAP_SharedVarsMutex.acquire()
+        BAP_x_realpos = self.x_realpos.copy()
+        BAP_y_realpos = self.y_realpos.copy()
+        BAP_x_setpoint = self.x_setpoint.copy()
+        BAP_y_setpoint = self.y_setpoint.copy()
+        BAP_x_motor_realpos = self.x_motor_realpos.copy()
+        BAP_y_motor_realpos = self.y_motor_realpos.copy()
+        BAP_x_motor_setpoint = self.x_motor_setpoint.copy()
+        BAP_y_motor_setpoint = self.y_motor_setpoint.copy()
+        BAP_controller = self.controller
+        BAP_mode = self.mode
+        BAP_SharedVarsMutex.release()
+
+    def array_move_block(self):
+        self.x_realpos[0:950] = self.x_realpos[50:1000].copy()
+        self.y_realpos[0:950] = self.y_realpos[50:1000].copy()
+        self.x_setpoint[0:950] = self.x_setpoint[50:1000].copy()
+        self.y_setpoint[0:950] = self.y_setpoint[50:1000].copy()
+        self.x_motor_realpos[0:950] = self.x_motor_realpos[50:1000].copy()
+        self.y_motor_realpos[0:950] = self.y_motor_realpos[50:1000].copy()
+        self.x_motor_setpoint[0:950] = self.x_motor_setpoint[50:1000].copy()
+        self.y_motor_setpoint[0:950] = self.y_motor_setpoint[50:1000].copy()
 
     def destroy(self):
         self.Running = 0
