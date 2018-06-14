@@ -206,7 +206,7 @@ class Ui_MainWindow(object):
 #Init value
         self.Circle_CentralX_Box.setValue(160)
         self.Circle_CentralY_Box.setValue(160)
-        self.Circle_R_Box.setValue(80)
+        self.Circle_R_Box.setValue(40)
 ###################
 #Disable circle boxes by default
         self.Circle_R_Box.lineEdit().setEnabled(False)
@@ -550,16 +550,21 @@ class Ui_MainWindow(object):
         if(self.time_sec < 20):
             self.time_sec += 1
             self.XAxist_Angle_Gra.plot(self.graph_x[0:self.time_sec*50], self.x_motor_realpos[0:self.time_sec*50], pen = 'g')
+            self.XAxist_Angle_Gra.plot(self.graph_x[0:self.time_sec*50], self.x_motor_setpoint[0:self.time_sec*50], pen = 'r')
             self.YAxist_Angle_Gra.plot(self.graph_x[0:self.time_sec*50], self.y_motor_realpos[0:self.time_sec*50], pen = 'g')
-            self.PlateView_Gra.plot(self.x_setpoint[0:self.time_sec*50], self.y_setpoint[0:self.time_sec*50], pen = 'r')
+            self.YAxist_Angle_Gra.plot(self.graph_x[0:self.time_sec*50], self.y_motor_setpoint[0:self.time_sec*50], pen = 'r')
         else:
             self.XAxist_Angle_Gra.plot(self.graph_x, self.x_motor_realpos, pen = 'g')
+            self.XAxist_Angle_Gra.plot(self.graph_x, self.x_motor_setpoint, pen = 'r')
             self.YAxist_Angle_Gra.plot(self.graph_x, self.y_motor_realpos, pen = 'g')
-            self.PlateView_Gra.plot(self.x_setpoint, self.y_setpoint, pen = 'r')
-        # self.graph_count += 1
-        # if(self.graph_count == 50):
-        #     self.graph_count = 0
-        #     self.XAxist_Angle_Gra.plot(self.graph_x, self.graph_y, pen = 'g')
+            self.YAxist_Angle_Gra.plot(self.graph_x, self.y_motor_setpoint, pen = 'r')
+
+        if(self.mode == 'FSe'):
+            self.PlateView_Gra.plot(self.x_realpos[self.time_sec*50 - 1:self.time_sec*50], self.y_realpos[self.time_sec*50 - 1:self.time_sec*50], pen = 'g', symbol = 'o', symbolBrush=('g'))
+            self.PlateView_Gra.plot(self.x_setpoint[self.time_sec*50 - 1:self.time_sec*50], self.y_setpoint[self.time_sec*50 - 1:self.time_sec*50], pen = 'r', symbol = 'o', symbolBrush=('r'))
+        else:
+            self.PlateView_Gra.plot(self.x_realpos[(self.time_sec-6)*50:self.time_sec*50], self.y_realpos[(self.time_sec-6)*50:self.time_sec*50], pen = 'g')
+            self.PlateView_Gra.plot(self.x_setpoint[(self.time_sec-6)*50:self.time_sec*50], self.y_setpoint[(self.time_sec-6)*50:self.time_sec*50], pen = 'r')
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Parsing thread
